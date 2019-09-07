@@ -6,7 +6,7 @@ const fs = require('fs');
 const MongoClient = require('mongodb').MongoClient;
 const crypto = require('crypto');
 
-const secret = 'abcdefg';
+const secret = fs.readFileSync('/var/openfaas/secrets/password-secret');
 
 var clientsDB;  // Cached connection-pool for further requests.
 
@@ -20,6 +20,8 @@ module.exports = (event, context) => {
             const hash = crypto.createHmac('sha256', secret)
                    .update(event.body.password)
                    .digest('hex');
+
+            console.log(hash);
 
             if(item.password != hash){
                 throw "erro";
@@ -36,7 +38,7 @@ module.exports = (event, context) => {
             context.status(200).succeed(result);
 
         }).catch(function(err){
-            context.status(401).succeed("Erro!");
+            context.status(401).succeed();
         });
     })
     .catch(err => {
