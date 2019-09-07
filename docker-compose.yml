@@ -1,0 +1,20 @@
+version: '3.3'
+services: 
+  registry:
+    ports:
+      - 5000:5000      
+    image: "registry:latest"
+    networks:
+      - functions
+  mongo:
+    ports:
+      - 27017:27017      
+    image: "mongo:latest"
+    networks:
+      - functions   
+networks:
+  functions:
+    driver: overlay
+    attachable: true
+    labels:
+      - "openfaas=true" 
