@@ -7,8 +7,7 @@
 /secrets
 **/template
 **/build
-
-
+**/.gitignore
 
 ### Eclipse ###
 .metadata
