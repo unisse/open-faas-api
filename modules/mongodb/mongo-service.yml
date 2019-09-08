@@ -1,0 +1,11 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080
+functions:
+  mongo-service:
+    lang: node10-express-service
+    handler: ./mongo-service
+    image: ${DOCKER_USER:-127.0.0.1:5000}/mongo-service:latest
+    secrets:
+      - hmac-secret

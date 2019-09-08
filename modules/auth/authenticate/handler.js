@@ -1,73 +1,50 @@
 "use strict"
 
-var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const fs = require('fs');
 
-const MongoClient = require('mongodb').MongoClient;
 const crypto = require('crypto');
+const axios = require('axios');
 
-const secret = fs.readFileSync('/var/openfaas/secrets/password-secret');
+const pass_secret = fs.readFileSync('/var/openfaas/secrets/password-secret');
+const hmac_secret = fs.readFileSync('/var/openfaas/secrets/hmac-secret');
 
-var clientsDB;  // Cached connection-pool for further requests.
+var url = "http://gateway:8080/function/mongo-service/users/findOne";
 
 module.exports = (event, context) => {
-    prepareDB()
-    .then((users) => {
-        users.collection("users").findOne({'email': event.body.email}).then(function (item) {
-            
-            console.log("Começou essa porra!!")
 
-            const hash = crypto.createHmac('sha256', secret)
-                   .update(event.body.password)
-                   .digest('hex');
+    var data = {'email': event.body.email};
 
-            console.log(hash);
+    axios.post(url, data, buildHeader(data)).then(function (response) {
+        const hash = crypto.createHmac('sha256', pass_secret)
+            .update(event.body.password)
+            .digest('hex');
 
-            if(item.password != hash){
-                throw "erro";
-            }
-            
-            var privateKey = fs.readFileSync('/var/openfaas/secrets/jwtRS256.key');
+        if(item.password != hash){
+            throw "erro";
+        }
+        
+        var privateKey = fs.readFileSync('/var/openfaas/secrets/jwtRS256.key');
 
-            var token = jwt.sign(item, privateKey, { algorithm: 'RS256', expiresIn: 60 * 60});
+        var token = jwt.sign(item, privateKey, { algorithm: 'RS256', expiresIn: 60 * 60});
 
-            const result =  {
-                token: token
-            };
+        const result =  {
+            token: token
+        };
+
+        context.status(200).succeed(result);
     
-            context.status(200).succeed(result);
-
-        }).catch(function(err){
-            context.status(401).succeed();
-        });
-    })
-    .catch(err => {
-        context.fail(err.toString());
+      })
+      .catch(function (error) {
+        context.status(200).succeed("erro");
     });
 }
 
-const prepareDB = () => {
-
-    const url = "mongodb://mongo:27017/comunas"
-
-    return new Promise((resolve, reject) => {
-        if(clientsDB) {
-            console.error("DB already connected.");
-            return resolve(clientsDB);
-        }
-
-        console.error("DB connecting");
-
-        MongoClient.connect(url, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-          }, (err, database) => {
-            if(err) {
-                return reject(err)
-            }
-    
-            clientsDB = database.db("comunas");
-            return resolve(clientsDB)
-        });
-    });
+function buildHeader(data){
+    var hmac = crypto.createHmac('sha384', hmac_secret).update(JSON.stringify(data)).digest('hex');
+    var header = {
+        'Http_Hmac':  hmac,
+        'Content-Type': 'application/json'
+    };
+    return {'headers': header};
 }

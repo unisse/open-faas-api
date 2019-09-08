@@ -12,10 +12,8 @@ module.exports = (event, context) => {
     jwt.verify(token, publicKey, {algorithm: 'RS256'}, function(err, result){
         
         if(err){
-            context.status(403).succeed(err);
-            return;
+            return context.status(403).succeed(err);            
         }
-       
         context.status(200).succeed(result);
     });
 }

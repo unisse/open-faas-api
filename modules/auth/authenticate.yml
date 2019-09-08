@@ -10,3 +10,4 @@ functions:
     secrets:
       - jwtRS256.key
       - password-secret
+      - hmac-secret
