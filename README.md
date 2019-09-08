@@ -4,7 +4,7 @@
 
 ### Projeto
 
-Esse projeto tem como objetivo ser a API para a plataforma comunitária Comunas. Quer tem como objetivo a promoção de comunidades mais ativas e próximas das soluções dos seus problemas.  
+Esse projeto tem como objetivo ser a API para a plataforma comunitária Comunas. Que tem como objetivo a promoção de comunidades mais ativas e próximas das soluções de seus problemas.  
 
 ### Como Começar
 
@@ -21,4 +21,4 @@ Depois disso é so subir as nossas funções e já pode começar!
 
 ### Arquitetura
 
-Esse projeto utiliza da arquitetura serveless atraves do [OpenFaas](). Qualquer dúvida, é fácil encontrar uma resposta na sua documentação [aqui](https://docs.openfaas.com/).
+Esse projeto utiliza da arquitetura serveless através do [OpenFaas](). Qualquer dúvida, é fácil encontrar uma resposta na sua documentação [aqui](https://docs.openfaas.com/).
