@@ -20,23 +20,21 @@ module.exports = (event, context) => {
             .update(event.body.password)
             .digest('hex');
 
-        if(item.password != hash){
-            throw "erro";
+        var user = response.data.result;
+
+        if(user.password != hash){
+            throw {'msg': "Invalid Authentication!"};
         }
         
         var privateKey = fs.readFileSync('/var/openfaas/secrets/jwtRS256.key');
-
-        var token = jwt.sign(item, privateKey, { algorithm: 'RS256', expiresIn: 60 * 60});
-
-        const result =  {
-            token: token
-        };
+        var token = jwt.sign(user, privateKey, { algorithm: 'RS256', expiresIn: 60 * 60});
+        const result =  {'token': token};
 
         context.status(200).succeed(result);
     
       })
-      .catch(function (error) {
-        context.status(200).succeed("erro");
+    .catch(function (error) {
+        context.status(401).succeed(error);
     });
 }
 
