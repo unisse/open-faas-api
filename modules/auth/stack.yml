@@ -11,3 +11,9 @@ functions:
       - jwtRS256.key
       - password-secret
       - hmac-secret
+  authorize:
+    lang: node10-express
+    handler: ./authorize
+    image: ${DOCKER_USER:-127.0.0.1:5000}/authorize:latest
+    secrets:
+      - jwtRS256.key.pub
