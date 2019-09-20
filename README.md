@@ -1,4 +1,4 @@
-# Comunas API
+# Unisse API
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Gitter](https://badges.gitter.im/comunasbrasil/community.svg)](https://gitter.im/comunasbrasil/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
@@ -21,4 +21,4 @@ Depois disso é so subir as nossas funções e já pode começar!
 
 ### Arquitetura
 
-Esse projeto utiliza da arquitetura serveless através do [OpenFaas](). Qualquer dúvida, é fácil encontrar uma resposta na sua documentação [aqui](https://docs.openfaas.com/).
+Esse projeto utiliza da arquitetura serveless através do OpenFaas. Qualquer dúvida, é fácil encontrar uma resposta na sua documentação [aqui](https://docs.openfaas.com/).
