@@ -1,0 +1,12 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080
+functions:
+  send-email:
+    lang: node10-express
+    handler: ./send-email
+    image: ${DOCKER_USER:-127.0.0.1:5000}/send-email:latest
+    secrets:
+      - hmac-secret
+      - email-config
