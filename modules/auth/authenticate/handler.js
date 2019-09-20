@@ -9,7 +9,7 @@ const axios = require('axios');
 const pass_secret = fs.readFileSync('/var/openfaas/secrets/password-secret');
 const hmac_secret = fs.readFileSync('/var/openfaas/secrets/hmac-secret');
 
-var url = "http://gateway:8080/function/mongo-service/users/findOne";
+const url = "http://gateway:8080/function/mongo-service/users/findOne";
 
 module.exports = (event, context) => {
 
