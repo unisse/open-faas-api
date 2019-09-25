@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const axios = require('axios');
 
 const pass_secret = fs.readFileSync('/var/openfaas/secrets/password-secret');
-const hmac_secret = fs.readFileSync('/var/openfaas/secrets/hmac-secret');
+const internal_secret = fs.readFileSync('/var/openfaas/secrets/internal-secret');
 
 var url = "http://gateway:8080/function/mongo-service/users/findOne";
 
@@ -39,9 +39,9 @@ module.exports = (event, context) => {
 }
 
 function buildHeader(data){
-    var hmac = crypto.createHmac('sha384', hmac_secret).update(JSON.stringify(data)).digest('hex');
+
     var header = {
-        'Http_Hmac':  hmac,
+        'x-http-internal-secret':  internal_secret,
         'Content-Type': 'application/json'
     };
     return {'headers': header};
