@@ -10,7 +10,7 @@ functions:
     secrets:
       - jwtRS256.key
       - password-secret
-      - hmac-secret
+      - internal-secret
   authorize:
     lang: node10-express
     handler: ./authorize

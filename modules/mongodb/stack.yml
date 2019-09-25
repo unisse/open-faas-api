@@ -8,4 +8,5 @@ functions:
     handler: ./mongo-service
     image: ${DOCKER_USER:-127.0.0.1:5000}/mongo-service:latest
     secrets:
-      - hmac-secret
+    - internal-secret
+    - mongo-secret
