@@ -10,8 +10,7 @@ module.exports = (event, context) => {
     
     axios.post(url, buildQuery(event.body), buildHeader(data)).then(function (response) {
         context.status(200).succeed(response.data.result);
-      })
-    .catch(function (error) {
+    }).catch(function (error) {
         context.fail(error);
     });
 
@@ -26,15 +25,16 @@ function buildQuery(data){
                         type: "Point" ,
                         coordinates: [ data.longitude, data.latituda] 
                       },
-                      $maxDistance: data.distancia >= 10000 ? 10000 : data.distance
-                } } };
+                      $maxDistance: data.distancia >= 10000 ? 10000 : data.distancia
+                    } 
+                  }
+                };
 
-     return query;
+    return query;
 
 }
 
 function buildHeader(){
-
     var header = {
         'x-http-internal-secret':  internal_secret,
         'Content-Type': 'application/json'
