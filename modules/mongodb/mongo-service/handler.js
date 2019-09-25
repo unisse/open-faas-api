@@ -1,10 +1,11 @@
 "use strict"
 
 const MongoClient = require('mongodb').MongoClient;
-const crypto = require('crypto');
+
 const fs = require('fs');
 
 const internalSecret = fs.readFileSync('/var/openfaas/secrets/internal-secret', 'utf-8');
+const mongoInfo = fs.readFileSync('/var/openfaas/secrets/mongo-secret', 'utf-8');
 
 var clientsDB;
 
@@ -43,7 +44,7 @@ class Routing {
             res.status(401).end({erro: true, msg: "Endpoint Not Authorized!"});
         }
         
-        next();  // call next() here to move on to next middleware/router
+        next(); 
     }
 
     save(req, res){
@@ -160,7 +161,7 @@ class Routing {
 
 const prepareDB = () => {
 
-    const url = "mongodb://mongo:27017"
+    const mongoInfo = JSON.parse(mongoInfo);
 
     return new Promise((resolve, reject) => {
         if(clientsDB) {
@@ -170,7 +171,7 @@ const prepareDB = () => {
 
         console.error("DB connecting");
 
-        MongoClient.connect(url, {
+        MongoClient.connect(mongoInfo.url, {
             useNewUrlParser: true,
             useUnifiedTopology: true
           }, (err, database) => {
@@ -178,7 +179,7 @@ const prepareDB = () => {
                 return reject(err)
             }
     
-            clientsDB = database.db("unisse");
+            clientsDB = database.db(mongoInfo.database);
             return resolve(clientsDB)
         });
     });
