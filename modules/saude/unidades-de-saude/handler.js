@@ -26,7 +26,7 @@ function buildQuery(data){
                         type: "Point" ,
                         coordinates: [ data.longitude, data.latituda] 
                       },
-                      $maxDistance: data.distance >= 10000 ? 10000 : data.distance
+                      $maxDistance: data.distancia >= 10000 ? 10000 : data.distance
                 } } };
 
      return query;
