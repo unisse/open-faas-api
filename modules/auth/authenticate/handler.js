@@ -38,7 +38,7 @@ module.exports = (event, context) => {
     });
 }
 
-function buildHeader(data){
+function buildHeader(){
 
     var header = {
         'x-http-internal-secret':  internal_secret,
