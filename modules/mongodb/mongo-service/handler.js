@@ -4,7 +4,7 @@ const MongoClient = require('mongodb').MongoClient;
 const crypto = require('crypto');
 const fs = require('fs');
 
-const hmac = fs.readFileSync('/var/openfaas/secrets/hmac-secret');
+const internalSecret = fs.readFileSync('/var/openfaas/secrets/internal-secret', 'utf-8');
 
 var clientsDB;
 
@@ -38,10 +38,8 @@ class Routing {
 
     verifyHmac(req, res, next){
         console.log('Intercepting requests ...');
-
-        var compute_hmac= crypto.createHmac('sha384', hmac).update(JSON.stringify(req.body)).digest('hex');
        
-        if(compute_hmac != req.get("Http_Hmac")){
+        if(internalSecret != req.get("x-http-internal-secret")){
             res.status(401).end({erro: true, msg: "Endpoint Not Authorized!"});
         }
         
