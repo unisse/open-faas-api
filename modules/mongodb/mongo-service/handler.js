@@ -161,7 +161,8 @@ class Routing {
 
 const prepareDB = () => {
 
-    const mongoInfo = JSON.parse(mongoInfo);
+    const mongo = JSON.parse(mongoInfo);
+    console.log(mongoInfo);
 
     return new Promise((resolve, reject) => {
         if(clientsDB) {
@@ -171,7 +172,7 @@ const prepareDB = () => {
 
         console.error("DB connecting");
 
-        MongoClient.connect(mongoInfo.url, {
+        MongoClient.connect(mongo.url, {
             useNewUrlParser: true,
             useUnifiedTopology: true
           }, (err, database) => {
@@ -179,7 +180,7 @@ const prepareDB = () => {
                 return reject(err)
             }
     
-            clientsDB = database.db(mongoInfo.database);
+            clientsDB = database.db(mongo.database);
             return resolve(clientsDB)
         });
     });
