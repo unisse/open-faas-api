@@ -8,7 +8,7 @@ const url = "http://gateway:8080/function/mongo-service/unidades-de-saude/find";
 
 module.exports = (event, context) => {
     
-    axios.post(url, buildQuery(event.body), buildHeader(data)).then(function (response) {
+    axios.post(url, buildQuery(event.body), buildHeader()).then(function (response) {
         context.status(200).succeed(response.data.result);
     }).catch(function (error) {
         context.fail(error);
