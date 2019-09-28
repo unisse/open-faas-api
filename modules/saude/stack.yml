@@ -8,4 +8,4 @@ functions:
     handler: ./unidades-de-saude
     image: ${DOCKER_USER:-127.0.0.1:5000}/unidades-de-saude:latest
     secrets:
-      - internal-secret
+    - internal-secret
