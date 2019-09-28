@@ -2,6 +2,8 @@
 
 const MongoClient = require('mongodb').MongoClient;
 
+var ObjectId = require('mongodb').ObjectId; 
+
 const fs = require('fs');
 
 const internalSecret = fs.readFileSync('/var/openfaas/secrets/internal-secret', 'utf-8');
@@ -29,22 +31,24 @@ class Routing {
     }
 
     bind(route) {        
-        this.app.all('/*', route.verifyHmac);
+        this.app.all('/*', route.verifySecret);
         this.app.put('/:collection/save', route.save);
         this.app.post('/:collection/findOne', route.findOne);
-        this.app.post('/:collection/findById/:id', route.findById);
+        this.app.get('/:collection/findById/:id', route.findById);
         this.app.post('/:collection/find', route.find);
         this.app.delete('/:collection/remove/:id', route.remove);
     }
 
-    verifyHmac(req, res, next){
+    verifySecret(req, res, next){
         console.log('Intercepting requests ...');
-       
+
         if(internalSecret != req.get("x-http-internal-secret")){
-            res.status(401).end({erro: true, msg: "Endpoint Not Authorized!"});
+            console.log("Secret not provided or wrong!")
+            res.sendStatus(401);
+        } else {
+            next(); 
         }
-        
-        next(); 
+       
     }
 
     save(req, res){
@@ -56,6 +60,10 @@ class Routing {
 
             console.log("Inserindo na coleção -> " + params.collection);
             console.log("Objeto Inserido -> " + JSON.stringify(body));
+
+            if(body._id){
+                body._id = ObjectId(body._id);
+            }
 
             db.collection(params.collection).save(body);
 
@@ -97,9 +105,9 @@ class Routing {
         prepareDB().then((db) => {
 
             console.log("Pesquisa na coleção -> " + params.collection);
-            console.log("Filtro realizado -> " + JSON.stringify(body));
+            console.log("Filtro realizado -> " + params.id);
 
-            db.collection(params.collection).findOne({_id: params.id}).then(function (item) {
+            db.collection(params.collection).findOne({"_id": ObjectId(params.id)}).then(function (item) {
                 res.send({erro: false, result: item});
             }).catch(function(err){
                 res.send({erro: true, msg: err});
@@ -122,15 +130,10 @@ class Routing {
             console.log("Pesquisa na coleção -> " + params.collection);
             console.log("Filtro realizado -> " + JSON.stringify(body));
 
-            var cursor = db.collection(params.collection).find(body);
-
-            let result = [];
-
-            while(cursor.hasNext()){
-                result.push(cursor.next());
-            }
-
-            res.send({erro: false, result: result});
+            db.collection(params.collection).find(body).toArray(function(err, result) {
+                if (err) throw err;
+                res.send({erro: false, result: result});
+              });
 
          })
         .catch(err => {
@@ -145,9 +148,10 @@ class Routing {
         prepareDB().then((db) => {
 
             console.log("Deleção na coleção -> " + params.collection);
+            console.log("Filtro realizado -> " + params.id);
 
-            db.collection(params.collection).remove({_id: params.id}, {justOne: true});
-
+            db.collection(params.collection).remove({"_id": ObjectId(params.id)}, {justOne: true});
+          
             res.send({erro: false, result: "Sucesso!"});
 
          })
@@ -162,7 +166,6 @@ class Routing {
 const prepareDB = () => {
 
     const mongo = JSON.parse(mongoInfo);
-    console.log(mongoInfo);
 
     return new Promise((resolve, reject) => {
         if(clientsDB) {
@@ -179,7 +182,6 @@ const prepareDB = () => {
             if(err) {
                 return reject(err)
             }
-    
             clientsDB = database.db(mongo.database);
             return resolve(clientsDB)
         });
