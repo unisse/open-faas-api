@@ -48,7 +48,7 @@ class Routing {
         } else {
             next(); 
         }
-        
+       
     }
 
     save(req, res){
@@ -133,9 +133,7 @@ class Routing {
             db.collection(params.collection).find(body).toArray(function(err, result) {
                 if (err) throw err;
                 res.send({erro: false, result: result});
-              });;
-
-            
+              });
 
          })
         .catch(err => {
@@ -153,7 +151,7 @@ class Routing {
             console.log("Filtro realizado -> " + params.id);
 
             db.collection(params.collection).remove({"_id": ObjectId(params.id)}, {justOne: true});
-
+          
             res.send({erro: false, result: "Sucesso!"});
 
          })
@@ -184,7 +182,6 @@ const prepareDB = () => {
             if(err) {
                 return reject(err)
             }
-    
             clientsDB = database.db(mongo.database);
             return resolve(clientsDB)
         });
