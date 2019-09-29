@@ -6,7 +6,7 @@ var ObjectId = require('mongodb').ObjectId;
 
 const fs = require('fs');
 
-const internalSecret = fs.readFileSync('/var/openfaas/secrets/internal-secret', 'utf-8');
+const internalSecret = fs.readFileSync('/var/openfaas/secrets/internal-secret', 'utf-8').replace(/(\r\n|\n|\r)/gm,"");
 const mongoInfo = fs.readFileSync('/var/openfaas/secrets/mongo-secret', 'utf-8');
 
 var clientsDB;

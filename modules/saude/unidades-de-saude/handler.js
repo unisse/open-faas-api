@@ -3,20 +3,20 @@
 const fs = require('fs');
 const axios = require('axios');
 
-const internal_secret = fs.readFileSync('/var/openfaas/secrets/internal-secret', 'utf-8');
+const internal_secret = fs.readFileSync('/var/openfaas/secrets/internal-secret', 'utf-8').replace(/(\r\n|\n|\r)/gm,"");
 
-const url = "http://gateway:8080/function/mongo-service/unidades-de-saude/find";
+const url = "http://gateway:8080/function/mongo-service/unidades/find";
 
 const buildQuery = (data) => {
 
-  var query = { "location":
+  var query = { "local":
                 { "$near":
                   { "$geometry":
                     { 
                       "type": "Point" ,
                       "coordinates": [ data.longitude, data.latitude] 
                     },
-                    "$maxDistance": data.distancia >= 10000 ? 10000 : data.distancia
+                    "$maxDistance": data.distancia || data.distancia <= 1000 ? data.distancia : 10000
                   } 
                 }
               };
@@ -37,6 +37,7 @@ module.exports = (event, context) => {
     axios.post(url, buildQuery(event.body), buildHeader()).then(function (response) {
         context.status(200).succeed(response.data.result);
     }).catch(function (error) {
-        context.status(500).succeed(error);
+      console.log(error);
+      context.status(500).succeed(error);
     });
 }
