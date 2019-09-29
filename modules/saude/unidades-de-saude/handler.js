@@ -52,15 +52,13 @@ module.exports = (event, context) => {
       context.status(422).succeed({"error": "Objeto para pesquisa inválido!"});
     }
    
-    axios.post(url, buildQuery(), buildHeader()).then(function (response) {
+    axios.post(url, buildQuery(data), buildHeader()).then(function (response) {
       context.status(200).succeed( {"unidades": response.data.result } );
     }).catch(function (error) {
       console.log(error)
       context.fail();
     });
 
-  });
-
-  
+  });  
 
 }
