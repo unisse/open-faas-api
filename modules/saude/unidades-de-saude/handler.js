@@ -2,41 +2,59 @@
 
 const fs = require('fs');
 const axios = require('axios');
+const Joi = require('@hapi/joi');
 
-const internal_secret = fs.readFileSync('/var/openfaas/secrets/internal-secret', 'utf-8');
+const internal_secret = fs.readFileSync('/var/openfaas/secrets/internal-secret', 'utf-8').replace(/(\r\n|\n|\r)/gm,"");
 
-const url = "http://gateway:8080/function/mongo-service/unidades-de-saude/find";
+const url = "http://gateway:8080/function/mongo-service/unidades/find";
+
+const buildQuery = (data) => {
+
+  var query = { "local":
+                { "$near":
+                  { "$geometry":
+                    { 
+                      "type": "Point" ,
+                      "coordinates": [ data.longitude, data.latitude] 
+                    },
+                    "$maxDistance": data.distancia <= 10000 ? data.distancia : 10000
+                  } 
+                }
+              };
+
+  return query;
+
+}
+
+const buildHeader = () => {
+  var header = {
+      'x-http-internal-secret':  internal_secret,
+      'Content-Type': 'application/json'
+  };
+  return {'headers': header};
+}
+
+const schema = Joi.object({
+  longitude: Joi.number().required(),
+  latitude: Joi.number().required(),
+  distancia: Joi.number().integer().required()
+});
 
 module.exports = (event, context) => {
-    axios.post(url, buildQuery(event.body), buildHeader()).then(function (response) {
-        context.status(200).succeed(response.data.result);
-    }).catch(function (error) {
-        context.status(500).succeed(error);
-    });
-}
 
-function buildQuery(data){
+  var data = event.body;
 
-    var query = { "location":
-                  { $near:
-                    { $geometry:
-                      { 
-                        "type": "Point" ,
-                        "coordinates": [ data.longitude, data.latitude] 
-                      },
-                      $maxDistance: data.distancia >= 10000 ? 10000 : data.distancia
-                    } 
-                  }
-                };
+  const { error, value }  = schema.validate(data);
 
-    return query;
+  if(error){
+    context.status(422).succeed({"error": error.message});
+  }
 
-}
+  axios.post(url, buildQuery(value), buildHeader()).then(function (response) {
+    context.status(200).succeed( {"unidades": response.data.result } );
+  }).catch(function (error) {
+    console.log(error)
+    context.fail();
+  });
 
-function buildHeader(){
-    var header = {
-        'x-http-internal-secret':  internal_secret,
-        'Content-Type': 'application/json'
-    };
-    return {'headers': header};
 }
