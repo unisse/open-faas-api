@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const axios = require('axios');
+const jsv = require('json-validator');
 
 const internal_secret = fs.readFileSync('/var/openfaas/secrets/internal-secret', 'utf-8').replace(/(\r\n|\n|\r)/gm,"");
 
@@ -33,11 +34,33 @@ const buildHeader = () => {
   return {'headers': header};
 }
 
+const validSchema = () => {
+  var valid  = {
+    longitude: { required: true },
+    latitude: { required: true },
+    distancia: { required: true }
+  };
+  return valid;
+}
+
 module.exports = (event, context) => {
-    axios.post(url, buildQuery(event.body), buildHeader()).then(function (response) {
-        context.status(200).succeed( {"unidades": response.data.result } );
+
+  var data = event.body;
+
+  jsv.validate(data, validSchema(), function(err, msg) {
+    if(err) {
+      context.status(422).succeed({"error": "Objeto para pesquisa inválido!"});
+    }
+   
+    axios.post(url, buildQuery(), buildHeader()).then(function (response) {
+      context.status(200).succeed( {"unidades": response.data.result } );
     }).catch(function (error) {
-      console.log(error);
-      context.status(500).succeed(error);
+      console.log(error)
+      context.fail();
     });
+
+  });
+
+  
+
 }
