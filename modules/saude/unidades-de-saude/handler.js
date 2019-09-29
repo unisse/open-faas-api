@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const axios = require('axios');
-const jsv = require('json-validator');
+const Joi = require('@hapi/joi');
 
 const internal_secret = fs.readFileSync('/var/openfaas/secrets/internal-secret', 'utf-8').replace(/(\r\n|\n|\r)/gm,"");
 
@@ -34,24 +34,18 @@ const buildHeader = () => {
   return {'headers': header};
 }
 
-const validSchema = () => {
-  var valid  = {
-    longitude: { required: true },
-    latitude: { required: true },
-    distancia: { required: true }
-  };
-  return valid;
-}
+const schema = Joi.object({
+  longitude: Joi.number().required(),
+  latitude: Joi.number().required(),
+  distancia: Joi.number().required()
+  }).with('longitude', 'latitude', 'distancia');
 
 module.exports = (event, context) => {
 
   var data = event.body;
 
-  jsv.validate(data, validSchema(), function(err, msg) {
-    if(err) {
-      context.status(422).succeed({"error": "Objeto para pesquisa inválido!"});
-    }
-   
+  Joi.validate(data, schema).then(data => {   
+    
     axios.post(url, buildQuery(data), buildHeader()).then(function (response) {
       context.status(200).succeed( {"unidades": response.data.result } );
     }).catch(function (error) {
@@ -59,6 +53,8 @@ module.exports = (event, context) => {
       context.fail();
     });
 
+  }).catch(err => {
+    context.status(422).succeed({"error": "Objeto para pesquisa inválido!"});
   });  
 
 }
