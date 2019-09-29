@@ -17,7 +17,7 @@ const buildQuery = (data) => {
                       "type": "Point" ,
                       "coordinates": [ data.longitude, data.latitude] 
                     },
-                    "$maxDistance": data.distancia || data.distancia <= 10000 ? data.distancia : 10000
+                    "$maxDistance": data.distancia <= 10000 ? data.distancia : 10000
                   } 
                 }
               };
@@ -37,24 +37,24 @@ const buildHeader = () => {
 const schema = Joi.object({
   longitude: Joi.number().required(),
   latitude: Joi.number().required(),
-  distancia: Joi.number().required()
-  }).with('longitude', 'latitude', 'distancia');
+  distancia: Joi.number().integer().required()
+});
 
 module.exports = (event, context) => {
 
   var data = event.body;
 
-  Joi.validate(data, schema).then(data => {   
-    
-    axios.post(url, buildQuery(data), buildHeader()).then(function (response) {
-      context.status(200).succeed( {"unidades": response.data.result } );
-    }).catch(function (error) {
-      console.log(error)
-      context.fail();
-    });
+  const { error, value }  = schema.validate(data);
 
-  }).catch(err => {
-    context.status(422).succeed({"error": "Objeto para pesquisa inválido!"});
-  });  
+  if(error){
+    context.status(422).succeed({"error": error.message});
+  }
+
+  axios.post(url, buildQuery(value), buildHeader()).then(function (response) {
+    context.status(200).succeed( {"unidades": response.data.result } );
+  }).catch(function (error) {
+    console.log(error)
+    context.fail();
+  });
 
 }
