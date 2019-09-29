@@ -16,7 +16,7 @@ const buildQuery = (data) => {
                       "type": "Point" ,
                       "coordinates": [ data.longitude, data.latitude] 
                     },
-                    "$maxDistance": data.distancia || data.distancia <= 1000 ? data.distancia : 10000
+                    "$maxDistance": data.distancia || data.distancia <= 10000 ? data.distancia : 10000
                   } 
                 }
               };
@@ -35,7 +35,7 @@ const buildHeader = () => {
 
 module.exports = (event, context) => {
     axios.post(url, buildQuery(event.body), buildHeader()).then(function (response) {
-        context.status(200).succeed(response.data.result);
+        context.status(200).succeed( {"unidades": response.data.result } );
     }).catch(function (error) {
       console.log(error);
       context.status(500).succeed(error);
